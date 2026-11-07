@@ -1,0 +1,15 @@
+# Trust model, deliberately narrow claims, and limitations
+
+**Not a production smart-contract service.** Fe 26.5.0 documentation warns that the language is not yet production-ready. Covenant Control has not undergone an external audit or public-chain deployment.
+
+- **Simulated balances, no tokens.** Capacity units represent accounting quantities, not token custody or transferred financial assets. No oracle or authenticated market data is integrated.
+- **Operator-entered incident.** Fe verifies the incident maximum/reserve that the call *supplies*; it cannot know whether the underlying real-world alert is true, whether an operator typed the correct numbers, or whether an off-chain risk analysis was sound.
+- **No persistent emergency lock.** `commitIncidentActions()` enforces supplied incident bounds for that call only. Other public `commit` / `commitActions` / `commitGoalActions` methods are still callable by an authorized operator and are not subject to a registered incident lock. The word 'incident-safe' must not imply a protocol-wide prohibition on future changes.
+- **Disposable keys only.** `app/chain.mjs` contains intentionally published, deterministic test private keys. Do not fund those accounts, expose this server outside localhost, or reuse any keys with value.
+- **Demo role selector, not user login.** The local HTTP server chooses between internal fixed demo keys based on an untrusted role parameter. Anyone with local API access can request the `admin` role. Fe authorization correctly distinguishes callers, but this is not an authenticated multiuser service.
+- **Local-only HTTP.** The service binds to `127.0.0.1`, not an external interface; it is still unsafe for a shared machine with untrusted local users. Origin checks and CSP are not production authentication.
+- **Audit journal is alterable.** JSONL records link via SHA-256 digests. This catches accidental edits in a stored snapshot, not a malicious rewrite of the entire journal. The shipped owner's JSON can be checked for internal consistency, not cryptographic ownership of a real transaction.
+- **In-memory EVM resets.** Restarting the server creates a new independent contract state and session ID. Past transaction hashes do not belong to the new chain or public explorer.
+- **Planner is intentionally bounded.** It returns up to three operations and a limited response family; it does not prove global optimization or reachability for every possible policy/goal. An infeasible verdict may be relative to the planner's supported strategies.
+- **Dependency provenance.** Direct and transitive npm dependencies are locked in a Windows-generated `package-lock.json` and were reinstalled with `npm ci` during the release gate. This supports npm version reproducibility, but does not guarantee future registry availability or imply an independent supply-chain audit.
+- **Synthetic evaluation.** In-code Fe assertions and deterministic EVM tests are substantial evidence but do not establish real-world protocol security or production risk-management quality.
